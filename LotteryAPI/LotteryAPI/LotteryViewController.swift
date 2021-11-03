@@ -54,9 +54,12 @@ final class LotteryViewController: UIViewController {
     }
   }
   
-  
   // 지금까지 진행된 회차
-  private var lattestDrawNumber: Int = 986
+  private var latestDrawNumber: Int = 986
+  
+  private var anchorDrawNumber: Int = 986
+  
+  private var anchorDate: Date = Calendar.current.date(from: DateComponents(year: 2021, month: 10, day: 23))!
   
   private var targetDrwNumber: Int = 0 {
     didSet {
@@ -87,9 +90,9 @@ final class LotteryViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    // 가장 최근회차 조회
-    // 요청 파라미터 값 뭘로 보내야할지 검색해야하는데 시스템 점검중..
-    fetchDrwtNumber(with: lattestDrawNumber)
+    setUpLatestDrawNumber()
+    
+    fetchDrwtNumber(with: latestDrawNumber)
     
     setUpDrawNumberTextField()
     
@@ -106,6 +109,13 @@ final class LotteryViewController: UIViewController {
       label.layer.masksToBounds = true
       label.layer.cornerRadius = label.frame.height / 2
     }
+  }
+  
+  func setUpLatestDrawNumber() {
+    
+    guard let distanceWeekFromAnchorDate = Calendar.current.dateComponents([.weekOfYear], from: anchorDate, to: Date()).weekOfYear else { return }
+    
+    latestDrawNumber = anchorDrawNumber + distanceWeekFromAnchorDate
   }
 
   /**
@@ -157,7 +167,7 @@ final class LotteryViewController: UIViewController {
   
   @objc func didTapDoneButton() {
     
-    let targetDrwNo = lattestDrawNumber - drawNumberPicker.selectedRow(inComponent: 0)
+    let targetDrwNo = latestDrawNumber - drawNumberPicker.selectedRow(inComponent: 0)
     
     fetchDrwtNumber(with: targetDrwNo)
     
@@ -175,7 +185,7 @@ extension LotteryViewController: UIPickerViewDataSource {
   
   func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
     
-    return lattestDrawNumber
+    return latestDrawNumber
   }
 }
 
@@ -187,15 +197,10 @@ extension LotteryViewController: UIPickerViewDelegate {
   
   func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
 
-    guard (0...lattestDrawNumber-1).contains(row) else { return "" }
+    guard (0...latestDrawNumber-1).contains(row) else { return "" }
 
     let targetIndex = row
 
-    return "\((1 ... lattestDrawNumber).reversed()[targetIndex])"
-  }
-  
-  func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-
-//    fetchDrwtNumber(with: lattestDrawNumber - row)
+    return "\((1 ... latestDrawNumber).reversed()[targetIndex])"
   }
 }
