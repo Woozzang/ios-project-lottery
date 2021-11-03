@@ -22,6 +22,28 @@ final class LotteryViewController: UIViewController {
     return pickerView
   }()
   
+  private var accessoryBar : UIToolbar = {
+
+    let toolbar = UIToolbar()
+
+    toolbar.setItems([UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
+                      UIBarButtonItem.init(title: "확인",
+                                           style: .done,
+                                           target: self,
+                                           action: #selector(didTapDoneButton))], animated: true)
+    
+    toolbar.barStyle = UIBarStyle.default
+    toolbar.isTranslucent = true
+    toolbar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
+    toolbar.sizeToFit()
+    
+    return toolbar
+  }()
+  
+  @IBOutlet weak var targetDateLabel: UILabel!
+  
+  @IBOutlet weak var titleLabel: UILabel!
+  
   @IBOutlet var drawtNumberLabelList: [UILabel]! {
     didSet {
       drawtNumberLabelList.forEach { label in
@@ -34,7 +56,32 @@ final class LotteryViewController: UIViewController {
   
   
   // 지금까지 진행된 회차
-  private var totalDrawNumber: Int = 300
+  private var lattestDrawNumber: Int = 986
+  
+  private var targetDrwNumber: Int = 0 {
+    didSet {
+      titleLabel.text = "\(targetDrwNumber)회 당첨 결과"
+    }
+  }
+  
+  private var targetDate: String = "" {
+    didSet {
+      targetDateLabel.text = targetDate
+    }
+  }
+  
+  
+  private var targetDrwtNumberDataList: [Int] = [] {
+    
+    didSet {
+      targetDrwtNumberDataList.enumerated().forEach { (index, number) in
+        
+        guard index < drawtNumberLabelList.count else { return }
+        
+        drawtNumberLabelList[index].text = "\(number)"
+      }
+    }
+  }
   
   
   override func viewDidLoad() {
@@ -42,11 +89,13 @@ final class LotteryViewController: UIViewController {
     
     // 가장 최근회차 조회
     // 요청 파라미터 값 뭘로 보내야할지 검색해야하는데 시스템 점검중..
-    fetchDrwtNumber()
+    fetchDrwtNumber(with: lattestDrawNumber)
     
     setUpDrawNumberTextField()
     
     setUpDrawNumberPicker()
+    
+    
   }
   
   override func viewDidAppear(_ animated: Bool) {
@@ -58,34 +107,46 @@ final class LotteryViewController: UIViewController {
       label.layer.cornerRadius = label.frame.height / 2
     }
   }
-  
+
   /**
-   "drwtNo2": 10,
-   "drwtNo3": 16,
-   "drwtNo1": 7
-   등으로 응답값이 와서 drwt 로 작명
+   원하는 회차가 있는 경우
    */
-  private func fetchDrwtNumber() {
+  private func fetchDrwtNumber(with targetDraw: Int) {
     
-//    let url = 
-//    
-//    Alamofire.request(url, method: .get).validate().responseJSON { response in
-//        switch response.result {
-//        case .success(let value):
-//            let json = JSON(value)
-//            print("JSON: \(json)")
-//        case .failure(let error):
-//            print(error)
-//        }
-//    }
+    let url = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=\(targetDraw)"
     
-    // TODO: 응답 값으로 초기화 필요
-//    totalDrawNumber = 0
+    AF.request(url, method: .get).validate().responseJSON { [weak self] response in
+    
+        switch response.result {
+    
+        case .success(let value):
+            
+            let json = JSON(value)
+            
+            self?.targetDate = json["drwNoDate"].stringValue
+            
+            self?.targetDrwNumber = json["drwNo"].intValue
+            
+            var drwtNumList = [Int]()
+            
+            for number in (1...6) {
+              
+              drwtNumList.append(json["drwtNo\(number)"].intValue)
+            }
+            
+            self?.targetDrwtNumberDataList = drwtNumList
+    
+        case .failure(let error):
+            
+            print(error.localizedDescription)
+        }
+    }
   }
   
   private func setUpDrawNumberTextField() {
+    
     drawNumberTextField.inputView = drawNumberPicker
-    drawNumberTextField.delegate = self
+    drawNumberTextField.inputAccessoryView = accessoryBar
   }
   
   private func setUpDrawNumberPicker() {
@@ -93,12 +154,16 @@ final class LotteryViewController: UIViewController {
     drawNumberPicker.delegate = self
     drawNumberPicker.dataSource = self
   }
-
-}
-
-
-extension LotteryViewController: UITextFieldDelegate {
   
+  @objc func didTapDoneButton() {
+    
+    let targetDrwNo = lattestDrawNumber - drawNumberPicker.selectedRow(inComponent: 0)
+    
+    fetchDrwtNumber(with: targetDrwNo)
+    
+    drawNumberTextField.resignFirstResponder()
+  }
+
 }
 
 extension LotteryViewController: UIPickerViewDataSource {
@@ -110,22 +175,27 @@ extension LotteryViewController: UIPickerViewDataSource {
   
   func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
     
-    return totalDrawNumber
+    return lattestDrawNumber
   }
 }
 
 extension LotteryViewController: UIPickerViewDelegate {
   
+  /*
+  회차를 역순으로 보여주기
+   */
+  
   func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-    
-    return "\(row + 1)"
+
+    guard (0...lattestDrawNumber-1).contains(row) else { return "" }
+
+    let targetIndex = row
+
+    return "\((1 ... lattestDrawNumber).reversed()[targetIndex])"
   }
   
   func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-    
-    let drawNumber = row + 1
-    
-    print(drawNumber)
-    // TODO:
+
+//    fetchDrwtNumber(with: lattestDrawNumber - row)
   }
 }

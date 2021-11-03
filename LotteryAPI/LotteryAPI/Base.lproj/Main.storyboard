@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -116,6 +116,8 @@
                     </view>
                     <connections>
                         <outlet property="drawNumberTextField" destination="XLs-p5-51U" id="8J4-Zb-2Xc"/>
+                        <outlet property="targetDateLabel" destination="Occ-9W-qvt" id="Gab-Vn-zZa"/>
+                        <outlet property="titleLabel" destination="Vhn-w5-BNo" id="360-9o-ePu"/>
                         <outletCollection property="drawtNumberLabelList" destination="Ah9-oP-pWu" collectionClass="NSMutableArray" id="tXD-Rc-yJl"/>
                         <outletCollection property="drawtNumberLabelList" destination="vHb-Qm-osL" collectionClass="NSMutableArray" id="YWC-G4-mZM"/>
                         <outletCollection property="drawtNumberLabelList" destination="XBw-IE-6Ca" collectionClass="NSMutableArray" id="bbb-8O-ff3"/>
